@@ -10,11 +10,15 @@ name: 🤖 Update
 jobs:
   update:
     runs-on: ubuntu-latest 
+    container: archlinux:base-devel
     name: "Update (📄: ${{ github.event.inputs.source }})"
 
     steps:
       - name: 📦 Checkout
         uses: actions/checkout@v4
+
+      - name: 🧰 Dependencies
+        run: pacman --noconfirm -Syu git cmake gcc ninja make
 
       - name: 🔧 Compile
         run: |

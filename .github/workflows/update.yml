@@ -27,8 +27,9 @@ jobs:
 
       - name: 🚧 Update 
         run: |
-          wget "${{ github.event.inputs.source }}" -o input.json
+          wget "${{ github.event.inputs.source }}" -O input.json
           ./build/embed input.json > data/mimes.txt
+          rm input.json
       
       - name: 🐙 Commit & Push
         uses: EndBug/add-and-commit@v9 

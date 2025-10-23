@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🧰 Dependencies
-        run: pacman --noconfirm -Syu git cmake gcc ninja make
+        run: pacman --noconfirm -Syu git cmake gcc ninja make wget
 
       - name: 🔧 Compile
         run: |

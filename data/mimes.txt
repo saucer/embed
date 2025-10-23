@@ -71,7 +71,7 @@ application/vnd.sun.xml.calc: [sxc]
 application/x-dvi: [dvi]
 video/x-smv: [smv]
 application/font-tdpfr: [pfr]
-application/vnd.shana.informed.package: [ipk]https://raw.githubusercontent.com/jshttp/mime-db/refs/heads/master/db.json
+application/vnd.shana.informed.package: [ipk]
 application/vnd.immervision-ivp: [ivp]
 application/vnd.fujitsu.oasys3: [oa3]
 application/vnd.iccprofile: [icc] [icm]

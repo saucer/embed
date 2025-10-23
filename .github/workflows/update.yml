@@ -15,7 +15,9 @@ jobs:
 
     steps:
       - name: 🧰 Dependencies
-        run: pacman --noconfirm -Syu git cmake gcc ninja make wget
+        run: |
+          pacman --noconfirm -Syu git cmake gcc ninja make wget
+          git config --global --add safe.directory '*'
 
       - name: 📦 Checkout
         uses: actions/checkout@v5

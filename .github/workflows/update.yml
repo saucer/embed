@@ -1,0 +1,33 @@
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        type: string
+        required: true
+        default: "https://raw.githubusercontent.com/jshttp/mime-db/refs/heads/master/db.json"
+
+name: 🤖 Update
+jobs:
+  update:
+    runs-on: ubuntu-latest 
+    name: "Update (📄: ${{ github.event.inputs.source }})"
+
+    steps:
+      - name: 📦 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Compile
+        run: |
+          cmake -B build -Dembed_parser=ON
+          cmake --build build 
+
+      - name: 🚧 Update 
+        run: |
+          wget ${{ github.event.inputs.source }} input.json
+          ./build/embed input.json > data/mimes.txt
+      
+      - name: 🐙 Commit & Push
+        uses: EndBug/add-and-commit@v9 
+        with:
+          default_author: github_actions
+          message: "feat(data): update database"

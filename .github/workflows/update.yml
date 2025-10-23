@@ -14,11 +14,11 @@ jobs:
     name: "Update (📄: ${{ github.event.inputs.source }})"
 
     steps:
-      - name: 📦 Checkout
-        uses: actions/checkout@v4
-
       - name: 🧰 Dependencies
         run: pacman --noconfirm -Syu git cmake gcc ninja make wget
+
+      - name: 📦 Checkout
+        uses: actions/checkout@v5
 
       - name: 🔧 Compile
         run: |

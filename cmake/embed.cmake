@@ -9,7 +9,7 @@ function(embed_message LEVEL MESSAGE)
 endfunction()
 
 function (embed_mime FILE OUTPUT)
-    cmake_path(GET FILE EXTENSION FILE_EXTENSION)
+    cmake_path(GET FILE EXTENSION LAST_ONLY FILE_EXTENSION)
 
     if (NOT FILE_EXTENSION)
         embed_message(WARNING "Could not determine extension for '${FILE}'")

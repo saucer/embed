@@ -1,8 +1,11 @@
+cmake_policy(SET CMP0174 NEW)
+
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/data/mimes.txt" MIME_DATA)
 string(REPLACE "\n" ";" MIME_LIST "${MIME_DATA}")
 
-set(_EMBED_DATA_DIR   "${CMAKE_CURRENT_SOURCE_DIR}/data" CACHE PATH "Data Path" FORCE)
-set(_EMBED_MIME_DATA  ${MIME_LIST}                       CACHE PATH "Mime Data" FORCE)
+set(_EMBED_SCRIPT     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/embed.cmale" CACHE PATH "Script Path" FORCE)
+set(_EMBED_DATA_DIR   "${CMAKE_CURRENT_SOURCE_DIR}/data"              CACHE PATH "Data Path"   FORCE)
+set(_EMBED_MIME_DATA  ${MIME_LIST}                                    CACHE PATH "Mime Data"   FORCE)
 
 function(embed_message LEVEL MESSAGE)
     message(${LEVEL} "embed: ${MESSAGE}")
@@ -79,14 +82,13 @@ endfunction()
 
 function(embed_target NAME DIRECTORY)
     set(TARGET "saucer_${NAME}")
-    set(ALIAS  "saucer::${NAME}")
 
     set(GLOB "${DIRECTORY}")
     cmake_path(APPEND GLOB "*.cpp")
     file(GLOB_RECURSE SOURCES ${GLOB})
 
     add_library(${TARGET} STATIC)
-    add_library(${ALIAS} ALIAS ${TARGET})
+    add_library("saucer::${NAME}" ALIAS ${TARGET})
 
     target_sources(${TARGET} PRIVATE ${SOURCES})
     target_include_directories(${TARGET} PUBLIC "${DIRECTORY}")
@@ -96,7 +98,7 @@ function(embed_target NAME DIRECTORY)
 endfunction()
 
 function(saucer_embed DIRECTORY)
-    cmake_parse_arguments(PARSE_ARGV 1 embed "" "NAME;DESTINATION" "")
+    cmake_parse_arguments(PARSE_ARGV 1 embed "" "NAME;DESTINATION;TARGET" "")
 
     if (NOT embed_DESTINATION)
         set(embed_DESTINATION "embedded")
@@ -157,6 +159,18 @@ function(saucer_embed DIRECTORY)
     endif()
 
     embed_target(${embed_NAME} "${output_ROOT}")
+
+    if (NOT embed_TARGET)
+        return()
+    endif()
+
+    set(PRE_TARGET "saucer_${embed_NAME}_pre")
+
+    add_custom_target(${PRE_TARGET}
+        COMMAND "${CMAKE_COMMAND} -P ${_EMBED_SCRIPT} ${DIRECTORY} ${output_ROOT}"
+    )
+
+    add_dependencies(${embed_TARGET} ${PRE_TARGET})
 endfunction()
 
 if (NOT CMAKE_SCRIPT_MODE_FILE)
@@ -167,4 +181,4 @@ if (CMAKE_ARGC LESS 4)
     embed_message(FATAL_ERROR "Usage: embed <directory> [destination]")
 endif()
 
-saucer_embed("${CMAKE_ARGV3}" "${CMAKE_ARGV4}")
+saucer_embed("${CMAKE_ARGV3}" DESTINATION "${CMAKE_ARGV4}")

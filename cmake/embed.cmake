@@ -3,7 +3,7 @@ cmake_policy(SET CMP0174 NEW)
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/data/mimes.txt" MIME_DATA)
 string(REPLACE "\n" ";" MIME_LIST "${MIME_DATA}")
 
-set(_EMBED_SCRIPT     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/embed.cmale" CACHE PATH "Script Path" FORCE)
+set(_EMBED_SCRIPT     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/embed.cmake" CACHE PATH "Script Path" FORCE)
 set(_EMBED_DATA_DIR   "${CMAKE_CURRENT_SOURCE_DIR}/data"              CACHE PATH "Data Path"   FORCE)
 set(_EMBED_MIME_DATA  ${MIME_LIST}                                    CACHE PATH "Mime Data"   FORCE)
 

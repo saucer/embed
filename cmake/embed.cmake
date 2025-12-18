@@ -168,7 +168,7 @@ function(saucer_embed DIRECTORY)
     set(PRE_TARGET "saucer_${embed_NAME}_pre")
 
     add_custom_target(${PRE_TARGET}
-        COMMAND           "${CMAKE_COMMAND} -P ${_EMBED_SCRIPT} ${DIRECTORY} ${output_ROOT}"
+        COMMAND           ${CMAKE_COMMAND} -P "${_EMBED_SCRIPT}" "${DIRECTORY}" "${output_ROOT}"
         WORKING_DIRECTORY "${_EMBED_ROOT}"
     )
 

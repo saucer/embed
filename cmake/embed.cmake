@@ -170,7 +170,7 @@ function(saucer_embed DIRECTORY)
     add_custom_target(${PRE_TARGET}
         COMMAND           ${CMAKE_COMMAND} -P "${_EMBED_SCRIPT}" "${DIRECTORY}" "${output_ROOT}"
         WORKING_DIRECTORY "${_EMBED_ROOT}"
-        BYPRODUCT         "${meta_FILE}"
+        BYPRODUCTS        "${meta_FILE}"
     )
 
     add_dependencies(${embed_TARGET} ${PRE_TARGET})

@@ -3,9 +3,10 @@ cmake_policy(SET CMP0174 NEW)
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/data/mimes.txt" MIME_DATA)
 string(REPLACE "\n" ";" MIME_LIST "${MIME_DATA}")
 
-set(_EMBED_SCRIPT     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/embed.cmake" CACHE PATH "Script Path" FORCE)
-set(_EMBED_DATA_DIR   "${CMAKE_CURRENT_SOURCE_DIR}/data"              CACHE PATH "Data Path"   FORCE)
-set(_EMBED_MIME_DATA  ${MIME_LIST}                                    CACHE PATH "Mime Data"   FORCE)
+set(_EMBED_ROOT       "${CMAKE_CURRENT_SOURCE_DIR}"      CACHE PATH "Embed Root"  FORCE)
+set(_EMBED_SCRIPT     "${_EMBED_ROOT}/cmake/embed.cmake" CACHE PATH "Script Path" FORCE)
+set(_EMBED_DATA_DIR   "${_EMBED_ROOT}/data"              CACHE PATH "Data Path"   FORCE)
+set(_EMBED_MIME_DATA  ${MIME_LIST}                       CACHE PATH "Mime Data"   FORCE)
 
 function(embed_message LEVEL MESSAGE)
     message(${LEVEL} "embed: ${MESSAGE}")
@@ -167,7 +168,8 @@ function(saucer_embed DIRECTORY)
     set(PRE_TARGET "saucer_${embed_NAME}_pre")
 
     add_custom_target(${PRE_TARGET}
-        COMMAND "${CMAKE_COMMAND} -P ${_EMBED_SCRIPT} ${DIRECTORY} ${output_ROOT}"
+        COMMAND           "${CMAKE_COMMAND} -P ${_EMBED_SCRIPT} ${DIRECTORY} ${output_ROOT}"
+        WORKING_DIRECTORY "${_EMBED_ROOT}"
     )
 
     add_dependencies(${embed_TARGET} ${PRE_TARGET})

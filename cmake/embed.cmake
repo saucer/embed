@@ -78,6 +78,7 @@ function(embed_generate OUTPUT)
     configure_file("${_EMBED_DATA_DIR}/embed.file.hpp.in" "${HEADER}")
 
     set(${OUTPUT}_HEADER "${HEADER}"    PARENT_SCOPE)
+    set(${OUTPUT}_SOURCE "${SOURCE}"    PARENT_SCOPE)
     set(${OUTPUT}_PATH   "/${RELATIVE}" PARENT_SCOPE)
 endfunction()
 
@@ -124,6 +125,7 @@ function(saucer_embed DIRECTORY)
     set(output_FILES "${output_HEADERS}")
     cmake_path(APPEND output_FILES "files")
 
+    set(generated_SOURCES  "")
     set(generated_INCLUDES "")
     set(generated_EMBEDDED "")
 
@@ -141,6 +143,8 @@ function(saucer_embed DIRECTORY)
         )
 
         cmake_path(RELATIVE_PATH embedded_HEADER BASE_DIRECTORY "${output_HEADERS}")
+
+        list(APPEND generated_SOURCES "${embedded_SOURCE}")
         list(APPEND generated_INCLUDES "#include \"${embedded_HEADER}\"")
 
         embed_mime("${path}" embedded_MIME)
@@ -170,7 +174,7 @@ function(saucer_embed DIRECTORY)
     add_custom_target(${PRE_TARGET}
         COMMAND           ${CMAKE_COMMAND} -P "${_EMBED_SCRIPT}" "${DIRECTORY}" "${output_ROOT}"
         WORKING_DIRECTORY "${_EMBED_ROOT}"
-        BYPRODUCTS        "${meta_FILE}"
+        BYPRODUCTS        "${generated_SOURCES}"
     )
 
     add_dependencies(${embed_TARGET} ${PRE_TARGET})

@@ -148,7 +148,7 @@ function(saucer_embed DIRECTORY)
         list(APPEND generated_INCLUDES "#include \"${embedded_HEADER}\"")
 
         embed_mime("${path}" embedded_MIME)
-        list(APPEND generated_EMBEDDED "{\"${embedded_PATH}\", saucer::embedded_file{.content = saucer::stash<>::view(${embedded_NAME}), .mime = \"${embedded_MIME}\"}}")
+        list(APPEND generated_EMBEDDED "{\"${embedded_PATH}\", saucer::embedded_file{.content = saucer::stash::view(${embedded_NAME}), .mime = \"${embedded_MIME}\"}}")
     endforeach()
 
     set(meta_FILE "${output_HEADERS}")

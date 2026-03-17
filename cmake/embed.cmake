@@ -1,9 +1,14 @@
 cmake_policy(SET CMP0174 NEW)
 
-file(READ "${CMAKE_CURRENT_SOURCE_DIR}/data/mimes.txt" MIME_DATA)
+set(_EMBED_ROOT "${CMAKE_CURRENT_SOURCE_DIR}" CACHE PATH "Embed Root" FORCE)
+
+if (CMAKE_SCRIPT_MODE_FILE)
+    cmake_path(GET _EMBED_ROOT PARENT_PATH _EMBED_ROOT)
+endif()
+
+file(READ "${_EMBED_ROOT}/data/mimes.txt" MIME_DATA)
 string(REPLACE "\n" ";" MIME_LIST "${MIME_DATA}")
 
-set(_EMBED_ROOT       "${CMAKE_CURRENT_SOURCE_DIR}"      CACHE PATH "Embed Root"  FORCE)
 set(_EMBED_SCRIPT     "${_EMBED_ROOT}/cmake/embed.cmake" CACHE PATH "Script Path" FORCE)
 set(_EMBED_DATA_DIR   "${_EMBED_ROOT}/data"              CACHE PATH "Data Path"   FORCE)
 set(_EMBED_MIME_DATA  ${MIME_LIST}                       CACHE PATH "Mime Data"   FORCE)

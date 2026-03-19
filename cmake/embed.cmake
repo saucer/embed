@@ -21,22 +21,31 @@ endfunction()
 function (embed_mime FILE OUTPUT)
     cmake_path(GET FILE EXTENSION LAST_ONLY FILE_EXTENSION)
 
-    if (NOT FILE_EXTENSION)
-        embed_message(WARNING "Could not determine extension for '${FILE}'")
-        return()
+    # TODO: Make use of string(REGEX QUOTE) once CMake 4.2 is a realistic target
+    if (FILE_EXTENSION)
+        string(SUBSTRING "${FILE_EXTENSION}" 1 -1 FILE_EXTENSION)
     endif()
 
-    # TODO: Make use of string(REGEX QUOTE) once CMake 4.2 is a realistic target
-    string(SUBSTRING "${FILE_EXTENSION}" 1 -1 FILE_EXTENSION)
+    # UPDATE: 1st check if we have direct mime definition for our file extension if not in 2nd run check for "*" mime definition to support generic file embedding
+    while(true)
+        embed_message(STATUS "Try to determine mime for ${FILE_EXTENSION}")
+        set(MIME_DATA ${_EMBED_MIME_DATA})
+        list(FILTER MIME_DATA INCLUDE REGEX "\\[${FILE_EXTENSION}\\]")
 
-    set(MIME_DATA ${_EMBED_MIME_DATA})
-    list(FILTER MIME_DATA INCLUDE REGEX "\\[${FILE_EXTENSION}\\]")
+        if ((NOT MIME_DATA) AND (NOT FILE_EXTENSION STREQUAL "\\*"))
+            embed_message(WARNING "Mime not determined for file extension ${FILE_EXTENSION} retry with *")
+            set(FILE_EXTENSION "\\*")
+        else()
+            break()
+        endif()
+    endwhile()
 
     if (NOT MIME_DATA)
         embed_message(WARNING "Could not determine mime for '${FILE}'")
         return()
     endif()
 
+    embed_message(STATUS "Determined ${MIME_DATA} for ${FILE_EXTENSION}")
     list(POP_FRONT MIME_DATA MIME_MATCH)
     string(REGEX MATCH "(.*):" _ "${MIME_MATCH}")
 

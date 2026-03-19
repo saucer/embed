@@ -27,13 +27,14 @@ function (embed_mime FILE OUTPUT)
     endif()
 
     # UPDATE: 1st check if we have direct mime definition for our file extension
-    embed_message(STATUS "Try to determine mime for ${FILE_EXTENSION}")
     set(MIME_DATA ${_EMBED_MIME_DATA})
     list(FILTER MIME_DATA INCLUDE REGEX "\\[${FILE_EXTENSION}\\]")
 
     # UPDATE: if mime not found - do not skip file but fallback to default "application/octet-stream" mime
     if (NOT MIME_DATA)
-        embed_message(STATUS "Could not determine mime for '${FILE}' - fallback to default application\/octet-stream.")
+        if (FILE_EXTENSION)
+            embed_message(WARNING "Could not determine mime for '${FILE}' - fallback to default application\/octet-stream.")
+        endif()
         set(MIME_DATA "application\/octet-stream:")
     endif()
 
@@ -44,7 +45,7 @@ function (embed_mime FILE OUTPUT)
         embed_message(WARNING "Could not extract mime from '${MIME_MATCH}' (${FILE})")
         return()
     endif()
-    embed_message(STATUS "Determined ${CMAKE_MATCH_1} for ${FILE_EXTENSION}")
+    embed_message(STATUS "Determined ${CMAKE_MATCH_1} for ${FILE}")
 
     set(${OUTPUT} "${CMAKE_MATCH_1}" PARENT_SCOPE)
 endfunction()

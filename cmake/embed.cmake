@@ -36,11 +36,6 @@ function (embed_mime FILE OUTPUT)
         set(MIME_DATA "application\/octet-stream:")
     endif()
 
-    if (NOT MIME_DATA)
-        embed_message(WARNING "Could not determine mime for '${FILE}'")
-        return()
-    endif()
-
     list(POP_FRONT MIME_DATA MIME_MATCH)
     string(REGEX MATCH "(.*):" _ "${MIME_MATCH}")
 

@@ -33,7 +33,7 @@ function (embed_mime FILE OUTPUT)
     # UPDATE: if mime not found - do not skip file but fallback to default "application/octet-stream" mime
     if (NOT MIME_DATA)
         if (FILE_EXTENSION)
-            embed_message(WARNING "Could not determine mime for '${FILE}' - fallback to default application\/octet-stream.")
+            embed_message(WARNING "Could not determine mime for '${FILE}' fallback to default application\/octet-stream.")
         endif()
         set(MIME_DATA "application\/octet-stream:")
     endif()

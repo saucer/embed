@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(embed LANGUAGES CXX VERSION 1.1.1)
+project(embed LANGUAGES CXX VERSION 2.0.0)
 
 # +-------------------------------------------------------------------------------------------------------+
 # | Library switches                                                                                      |

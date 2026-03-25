@@ -1,5 +1,15 @@
 cmake_policy(SET CMP0174 NEW)
 
+# +-------------------------------------------------------------------------------------------------------+
+# | Embed options                                                                                         |
+# +-------------------------------------------------------------------------------------------------------+
+
+set(saucer_embed_default_mime "application/octet-stream" CACHE STRING "Default / Fallback Mime")
+
+# +-------------------------------------------------------------------------------------------------------+
+# | Embed internals                                                                                       |
+# +-------------------------------------------------------------------------------------------------------+
+
 set(_EMBED_ROOT "${CMAKE_CURRENT_SOURCE_DIR}" CACHE PATH "Embed Root" FORCE)
 
 if (CMAKE_SCRIPT_MODE_FILE)
@@ -10,32 +20,40 @@ endif()
 file(READ "${_EMBED_ROOT}/data/mimes.txt" MIME_DATA)
 string(REPLACE "\n" ";" MIME_LIST "${MIME_DATA}")
 
-set(_EMBED_SCRIPT     "${_EMBED_ROOT}/cmake/embed.cmake" CACHE PATH "Script Path" FORCE)
-set(_EMBED_DATA_DIR   "${_EMBED_ROOT}/data"              CACHE PATH "Data Path"   FORCE)
-set(_EMBED_MIME_DATA  ${MIME_LIST}                       CACHE PATH "Mime Data"   FORCE)
+set(_EMBED_SCRIPT      "${_EMBED_ROOT}/cmake/embed.cmake" CACHE PATH "Script Path"  FORCE)
+set(_EMBED_DATA_DIR    "${_EMBED_ROOT}/data"              CACHE PATH "Data Path"    FORCE)
+set(_EMBED_MIME_DATA   ${MIME_LIST}                       CACHE PATH "Mime Data"    FORCE)
+
+# +-------------------------------------------------------------------------------------------------------+
+# | Convenience wrapper over `message`                                                                    |
+# +-------------------------------------------------------------------------------------------------------+
 
 function(embed_message LEVEL MESSAGE)
     message(${LEVEL} "embed: ${MESSAGE}")
 endfunction()
 
+# +-------------------------------------------------------------------------------------------------------+
+# | Setup embed                                                                                           |
+# +-------------------------------------------------------------------------------------------------------+
+
 function (embed_mime FILE OUTPUT)
     cmake_path(GET FILE EXTENSION LAST_ONLY FILE_EXTENSION)
 
-    # TODO: Make use of string(REGEX QUOTE) once CMake 4.2 is a realistic target
     if (FILE_EXTENSION)
         string(SUBSTRING "${FILE_EXTENSION}" 1 -1 FILE_EXTENSION)
     endif()
 
-    # UPDATE: 1st check if we have direct mime definition for our file extension
+    # TODO: Make use of string(REGEX QUOTE) once CMake 4.2 is a realistic target
+
     set(MIME_DATA ${_EMBED_MIME_DATA})
     list(FILTER MIME_DATA INCLUDE REGEX "\\[${FILE_EXTENSION}\\]")
 
-    # UPDATE: if mime not found - do not skip file but fallback to default "application/octet-stream" mime
+    if (NOT MIME_DATA AND FILE_EXTENSION)
+        embed_message(WARNING "Could not determine mime for '${FILE}'. Defaulting to: '${saucer_embed_default_mime}'")
+    endif()
+
     if (NOT MIME_DATA)
-        if (FILE_EXTENSION)
-            embed_message(WARNING "Could not determine mime for '${FILE}' fallback to default application\/octet-stream.")
-        endif()
-        set(MIME_DATA "application\/octet-stream:")
+        set(MIME_DATA "${saucer_embed_default_mime}:")
     endif()
 
     list(POP_FRONT MIME_DATA MIME_MATCH)
@@ -45,7 +63,6 @@ function (embed_mime FILE OUTPUT)
         embed_message(WARNING "Could not extract mime from '${MIME_MATCH}' (${FILE})")
         return()
     endif()
-    embed_message(STATUS "Determined ${CMAKE_MATCH_1} for ${FILE}")
 
     set(${OUTPUT} "${CMAKE_MATCH_1}" PARENT_SCOPE)
 endfunction()
@@ -188,12 +205,35 @@ function(saucer_embed DIRECTORY)
     add_dependencies(${embed_TARGET} ${PRE_TARGET})
 endfunction()
 
+# +-------------------------------------------------------------------------------------------------------+
+# | Setup script                                                                                          |
+# +-------------------------------------------------------------------------------------------------------+
+
 if (NOT CMAKE_SCRIPT_MODE_FILE)
     return()
 endif()
 
-if (CMAKE_ARGC LESS 4)
-    embed_message(FATAL_ERROR "Usage: embed <directory> [destination]")
+set(_EMBED_ARG_START -1)
+set(_EMBED_ARG_COUNT -1)
+
+foreach(_arg RANGE ${CMAKE_ARGC})
+    if (NOT "${CMAKE_ARGV${_arg}}" STREQUAL "--")
+        continue()
+    endif()
+
+    set(_EMBED_ARG_START ${_arg})
+    break()
+endforeach()
+
+math(EXPR _EMBED_ARG_START "${_EMBED_ARG_START} + 1")
+math(EXPR _EMBED_ARG_END   "${_EMBED_ARG_START} + 1")
+math(EXPR _EMBED_ARG_COUNT "${CMAKE_ARGC} - ${_EMBED_ARG_START}")
+
+if (_EMED_ARG_START EQUAL -1 OR _EMBED_ARG_COUNT LESS 1 OR _EMBED_ARG_COUNT GREATER 2)
+    embed_message(FATAL_ERROR "Usage: cmake [..] -P <embed.cmake> -- <directory> [destination]")
 endif()
 
-saucer_embed("${CMAKE_ARGV3}" DESTINATION "${CMAKE_ARGV4}")
+set(_EMBED_ARGV0 "${CMAKE_ARGV${_EMBED_ARG_START}}")
+set(_EMBED_ARGV1 "${CMAKE_ARGV${_EMBED_ARG_END}}")
+
+saucer_embed("${_EMBED_ARGV0}" DESTINATION "${_EMBED_ARGV1}")

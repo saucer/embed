@@ -21,20 +21,21 @@ endfunction()
 function (embed_mime FILE OUTPUT)
     cmake_path(GET FILE EXTENSION LAST_ONLY FILE_EXTENSION)
 
-    if (NOT FILE_EXTENSION)
-        embed_message(WARNING "Could not determine extension for '${FILE}'")
-        return()
+    # TODO: Make use of string(REGEX QUOTE) once CMake 4.2 is a realistic target
+    if (FILE_EXTENSION)
+        string(SUBSTRING "${FILE_EXTENSION}" 1 -1 FILE_EXTENSION)
     endif()
 
-    # TODO: Make use of string(REGEX QUOTE) once CMake 4.2 is a realistic target
-    string(SUBSTRING "${FILE_EXTENSION}" 1 -1 FILE_EXTENSION)
-
+    # UPDATE: 1st check if we have direct mime definition for our file extension
     set(MIME_DATA ${_EMBED_MIME_DATA})
     list(FILTER MIME_DATA INCLUDE REGEX "\\[${FILE_EXTENSION}\\]")
 
+    # UPDATE: if mime not found - do not skip file but fallback to default "application/octet-stream" mime
     if (NOT MIME_DATA)
-        embed_message(WARNING "Could not determine mime for '${FILE}'")
-        return()
+        if (FILE_EXTENSION)
+            embed_message(WARNING "Could not determine mime for '${FILE}' fallback to default application\/octet-stream.")
+        endif()
+        set(MIME_DATA "application\/octet-stream:")
     endif()
 
     list(POP_FRONT MIME_DATA MIME_MATCH)
@@ -44,6 +45,7 @@ function (embed_mime FILE OUTPUT)
         embed_message(WARNING "Could not extract mime from '${MIME_MATCH}' (${FILE})")
         return()
     endif()
+    embed_message(STATUS "Determined ${CMAKE_MATCH_1} for ${FILE}")
 
     set(${OUTPUT} "${CMAKE_MATCH_1}" PARENT_SCOPE)
 endfunction()
